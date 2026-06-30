@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MAURIO — kunst.raum.statement.</title>
+<!--
+╔══════════════════════════════════════════════════════════════════════════╗
+║  MAURIO — WARTUNGS-GUIDE                                                  ║
+║  Alle bearbeitbaren Stellen sind im Code mit »ANPASSEN:« markiert.        ║
+║  → Einfach mit Strg+F (Cmd+F) nach "ANPASSEN" suchen.                     ║
+╠══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  1) FARBEN ……………… ganz oben im <style> unter »:root«                       ║
+║     Dort liegen ALLE Farben zentral (Hintergrund, Gold, Text, Rahmen).    ║
+║     Eine Änderung dort wirkt auf die gesamte Seite.                       ║
+║                                                                            ║
+║  2) SCHRIFTEN ………… Suche nach »ANPASSEN: Fließtext-Schrift« und           ║
+║     »ANPASSEN: Überschriften-Schrift«. Neue Google-Fonts müssen           ║
+║     zusätzlich oben im <link href="https://fonts.googleapis.com/…">       ║
+║     eingebunden werden.                                                   ║
+║                                                                            ║
+║  3) TEXTE                                                                  ║
+║     • Startseiten-Folien 1–5: im HTML, Kommentare »Folie 1« … »Folie 5«   ║
+║       (alle Folien gleich aufgebaut: Überschrift, Text, Button)           ║
+║     • Unterseiten (Künstler/Formate/Team/Legal): je ein <div class=       ║
+║       "page"> mit klarer Überschrift im Kommentar darüber                 ║
+║     • Künstler-Detailtexte (Name, Genre, Bio, Social-Links):              ║
+║       im Script-Teil unter »const artists«                                   ║
+║     • Format-Detailtexte (Titel, Beschreibung):                           ║
+║       im Script-Teil unter »const formats«                                   ║
+║                                                                            ║
+║  4) BILDER                                                                 ║
+║     • Logo (Header + Footer): das <img> im Header (.nav-logo) ersetzen —  ║
+║       der Footer übernimmt das Header-Logo automatisch per Script.        ║
+║       Entweder Datei verlinken (src="logo.png") oder neues Base64         ║
+║       einsetzen. Empfehlung: echte Datei, hält die HTML-Datei klein.      ║
+║     • Künstler-Karten & Detailseite: graue Flächen mit Klasse             ║
+║       .aic-img-placeholder bzw. .adh-placeholder — dort ein               ║
+║       <img src="…" style="width:100%;height:100%;object-fit:cover">       ║
+║       einsetzen (object-fit:cover = Bild füllt die Fläche randlos).       ║
+║                                                                            ║
+║  5) VIDEOS                                                                 ║
+║     • Format-Detailseite: im Script-Teil bei »const formats« das Feld        ║
+║       videoUrl füllen (YouTube/Vimeo-EMBED-Link, z. B.                    ║
+║       https://www.youtube.com/embed/VIDEOID) — der Player erscheint       ║
+║       dann automatisch statt des Platzhalters.                            ║
+║     • Startfolie: hat aktuell einen Farbverlauf (kein Video mehr).        ║
+║       Suche »ANPASSEN: Hero-Hintergrund«, um den Verlauf zu ändern.       ║
+║                                                                            ║
+║  6) HEADER / NAVIGATION                                                    ║
+║     Menüpunkte: im HTML unter <nav id="main-nav"> → .nav-links            ║
+║     Schriftstärke/Größe: Suche »ANPASSEN: Schriftstärke Header-Menü«      ║
+║     Header-Höhe: Variable --nav-h in »:root« (+ Mobile-Breakpoints).      ║
+║                                                                            ║
+║  7) STARTSEITEN-SLIDER                                                     ║
+║     Auto-Weiterblättern: Suche »ANPASSEN: Auto-Scroll« (Zeit in ms,       ║
+║     6000 = 6 Sekunden). Mausrad blättert die Folien, auf Unterseiten      ║
+║     wird normal gescrollt.                                                ║
+║                                                                            ║
+║  ─── WICHTIGE HINWEISE ──────────────────────────────────────────────────  ║
+║  • Höhen nutzen die Variable --nav-h und dvh-Einheiten: Wenn du die       ║
+║    Header-Höhe änderst, NUR --nav-h anpassen — nicht die calc()-Werte.    ║
+║  • Die Base64-Bildblöcke (sehr lange Zeichenketten "data:image/…") nie    ║
+║    teilweise löschen/kürzen — sonst ist das Bild defekt.                  ║
+║  • IDs (z. B. id="detail-name", id="hSlider") nicht umbenennen — das      ║
+║    JavaScript greift darauf zu.                                           ║
+║  • Beim Hinzufügen/Entfernen von Folien: die Punkte-Navigation und        ║
+║    das Auto-Scroll passen sich automatisch an (Folien werden gezählt).    ║
+║  • Nach Änderungen die Seite immer einmal mobil testen (DevTools,         ║
+║    Geräte-Simulation), besonders Folie 1 und das Menü.                    ║
+╚══════════════════════════════════════════════════════════════════════════╝
+-->
+<link href="https://fonts.googleapis.com/css2?family=Charis+SIL:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"/>
+  <script type="module" crossorigin src="/maurio-/assets/index-6bQk2jOV.js"></script>
+  <link rel="stylesheet" crossorigin href="/maurio-/assets/index-CY9ZdVoV.css">
+</head>
+<body>
+
+<!-- ═══════ NAV (global) ═══════ -->
+<div id="page-transition" aria-hidden="true">
+  <div class="pt-stripe"></div>
+  <div class="pt-stripe"></div>
+  <div class="pt-stripe"></div>
+</div>
+<!-- ═══════ HEADER / NAVIGATION (global, auf allen Seiten sichtbar) ═══════
+     ANPASSEN: LOGO — das <img> unten ersetzen (src="dein-logo.png" oder Base64).
+     Der Footer übernimmt dieses Logo automatisch.
+     ANPASSEN: MENÜPUNKTE — weiter unten in <ul class="nav-links"> (Text + Ziel-Seite). -->
+<nav id="main-nav">
+  <div class="nav-logo-group" onclick="showPage('home')">
+    <img class="nav-logo-wordmark" src="/maurio-/assets/logo-maurio-C6pSjOJC.svg" alt="MAURIO – kunst.raum.statement"/>
+  </div>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" data-page="home">MAURIO</a></li>
+    <li><a onclick="showPage('vision')" data-page="vision">VISION</a></li>
+    <li><a onclick="showPage('projekte')" data-page="projekte">PROJEKTE</a></li>
+    <li><a onclick="showPage('kuenstler')" data-page="kuenstler">KÜNSTLER:INNEN</a></li>
+    <li><a onclick="showPage('team')" data-page="team">MENSCHEN</a></li>
+    <li><a onclick="showPage('legal')" data-page="legal">KONTAKT</a></li>
+  </ul>
+  <button class="nav-burger" type="button" aria-label="Menü öffnen" aria-expanded="false"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ═══════════════════════════
+     HOME
+═══════════════════════════ -->
+<div class="page active" id="home">
+  <div class="h-slider" id="hSlider">
+
+    <!-- ── Folie 1 — Intro — ANPASSEN: Überschrift (h1), Text (p) und Button direkt hier im Block.
+         Hintergrund: Farbverlauf (.hero-gradient), s. ANPASSEN: Hero-Hintergrund im <style>. -->
+    <section class="h-slide intro-slide" aria-label="Intro">
+      <div class="hero-gradient" aria-hidden="true">
+        <span class="h-tick tl"></span><span class="h-tick tr"></span><span class="h-tick bl"></span><span class="h-tick br"></span>
+      </div>
+      <div class="h-overlay intro">
+        <h1><span class="hw">kunst.</span><span class="hw">raum.</span><span class="hw">statement.</span></h1>
+        <div class="hero-body">
+          <p class="hero-line hero-lead"><strong>Events | Booking | Formate</strong></p>
+          <p class="hero-line">Wir schaffen Raum für Kunst.</p>
+          <p class="hero-line">Wir begleiten Künstler:innen.</p>
+          <p class="hero-line">Wir bringen Kultur auf die Bühne.</p>
+          <p class="hero-line hero-bold"><strong>Mehr als nur Events.</strong></p>
+          <p class="hero-line hero-bold"><strong>Mehr als nur Booking.</strong></p>
+          <p class="hero-line hero-bold"><strong>Wir sind das, was uns selbst gefehlt hat.</strong></p>
+        </div>
+        <a class="btn btn-solid" onclick="showPage('projekte')">Formate entdecken →</a>
+      </div>
+      <div class="h-hint"><span>Scrollen</span><span class="ar">→</span></div>
+    </section>
+
+    <!-- ── Folie 2 — Künstler — ANPASSEN: Überschrift (h2), Text (p) und Button direkt hier im Block -->
+    <section class="h-slide spotlight-slide" aria-label="Künstler">
+      <div class="h-visual"><img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="" style="width:100%;height:100%;object-fit:cover" aria-hidden="true"/><div class="spotlight-overlay"></div><span class="h-tick tl"></span><span class="h-tick tr"></span><span class="h-tick bl"></span><span class="h-tick br"></span></div>
+      <div class="h-overlay">
+        <span class="h-num">01</span>
+        <h2>Künstler:innen</h2>
+        <p>DJs, Live-Acts und Performer:innen aus 20 Jahren Nachtleben — kuratiert für den Moment, der bleibt.</p>
+        <a class="btn btn-solid" onclick="showPage('kuenstler')">Künstler:innen ansehen →</a>
+      </div>
+    </section>
+
+    <!-- ── Folie 3 — Formate — ANPASSEN: Überschrift (h2), Text (p) und Button direkt hier im Block -->
+    <section class="h-slide right spotlight-slide" aria-label="Formate">
+      <div class="h-visual"><img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="" style="width:100%;height:100%;object-fit:cover" aria-hidden="true"/><div class="spotlight-overlay"></div><span class="h-tick tl"></span><span class="h-tick tr"></span><span class="h-tick bl"></span><span class="h-tick br"></span></div>
+      <div class="h-overlay">
+        <span class="h-num">02</span>
+        <h2>Formate</h2>
+        <p>Von der intimen Clubnacht bis zur großen Bühne — Konzepte, die Räume in Statements verwandeln.</p>
+        <a class="btn btn-solid" onclick="showPage('projekte')">Formate entdecken →</a>
+      </div>
+    </section>
+
+    <!-- ── Folie 4 — Team — ANPASSEN: Überschrift (h2), Text (p) und Button direkt hier im Block -->
+    <section class="h-slide spotlight-slide" aria-label="Team">
+      <div class="h-visual"><img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="" style="width:100%;height:100%;object-fit:cover" aria-hidden="true"/><div class="spotlight-overlay"></div><span class="h-tick tl"></span><span class="h-tick tr"></span><span class="h-tick bl"></span><span class="h-tick br"></span></div>
+      <div class="h-overlay">
+        <span class="h-num">03</span>
+        <h2>Team</h2>
+        <p>Die Menschen hinter MAURIO — Erfahrung, Haltung und ein Gespür für den richtigen Augenblick.</p>
+        <a class="btn btn-solid" onclick="showPage('team')">Wer wir sind →</a>
+      </div>
+    </section>
+
+    <!-- ── Folie 5 — Kontakt — ANPASSEN: Überschrift (h2), Text (p) und Button direkt hier im Block -->
+    <section class="h-slide right spotlight-slide" aria-label="Kontakt">
+      <div class="h-visual">
+        <div id="lottie-kontakt" aria-hidden="true"></div>
+        <div class="spotlight-overlay"></div>
+        <span class="h-tick tl"></span><span class="h-tick tr"></span><span class="h-tick bl"></span><span class="h-tick br"></span>
+      </div>
+      <div class="h-overlay">
+        <span class="h-num">04</span>
+        <h2>Kontakt</h2>
+        <p>Booking, Kooperationen oder Fragen — wir freuen uns auf deine Nachricht.</p>
+        <a class="btn btn-solid" onclick="showPage('legal')">Kontakt & Legal →</a>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Fortschritts-Punkte -->
+  <div class="h-dots" id="hDots" aria-hidden="true"></div>
+</div>
+
+<!-- ═══════════════════════════
+     VISION
+═══════════════════════════ -->
+<div class="page" id="vision">
+  <div class="page-header">
+    <div class="container">
+      <h1 class="h-page">Unsere<br><em>Vision.</em></h1>
+      <div class="divider"></div>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="container">
+      <div class="vision-content">
+        <h2 class="vision-headline">UNSERE GESCHICHTE</h2>
+        <div class="vision-text">
+          <p>MAURIO ist 2025 als Marke entstanden. Unsere Wurzeln reichen jedoch viel tiefer. Seit über 20 Jahren bewegen wir uns in der Veranstaltungsbranche. Wir haben unzählige Events erlebt, organisiert und selbst auf der Bühne gestanden. Diese Erfahrungen haben uns gezeigt, wie wichtig es ist, Räume zu schaffen, in denen Kunst, Begegnung und echte Erlebnisse im Mittelpunkt stehen.</p>
+          <p>Mit MAURIO setzen wir genau das um. Die Marke vereint eigene Formate, Künstler:innen und Live-Erlebnisse unter einem gemeinsamen Dach. Wir entwickeln Konzepte, begleiten Künstler:innen auf ihrem Weg und schaffen Veranstaltungen, die mehr sind als reine Unterhaltung.</p>
+          <p>Wir schaffen Erlebnisse, die verbinden und in Erinnerung bleiben.</p>
+          <p>Im Mittelpunkt stehen für uns immer die Menschen. Wir begegnen allen mit Qualität, Authentizität und dem Anspruch auf eine langfristige Zusammenarbeit.</p>
+          <p>Denn wir glauben: Kunst verbindet. Begegnungen inspirieren. Und die schönsten Geschichten entstehen dort, wo Menschen gemeinsam etwas erleben.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════
+     KÜNSTLER
+═══════════════════════════ -->
+<div class="page" id="kuenstler">
+  <div class="page-header">
+    <div class="container">
+      <h1 class="h-page">Unsere<br><em>Künstler:innen.</em></h1>
+      <div class="divider"></div>
+      <p class="body-s" style="max-width:480px">Menschen mit Haltung. Performances mit Nachhall. Jede:r Künstler:in bei MAURIO steht für eine eigene Handschrift.</p>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="container">
+      <!-- ANPASSEN: KÜNSTLER-BILDER — die grauen Flächen (.aic-img-placeholder)
+           durch echte Bilder ersetzen, z. B.:
+           <img src="kuenstler1.jpg" alt="Name" style="width:100%;height:100%;object-fit:cover">
+           (das <div class="aic-img-placeholder">…</div> dabei entfernen) -->
+      <div class="artist-img-grid">
+
+        <div class="aic" onclick="showArtist('a1')">
+          <div class="aic-img">
+            <img src="/maurio-/assets/kuenstler-noahnemeth-BMpB__sJ.png" alt="Noah Nemeth" style="width:100%;height:100%;object-fit:cover"/>
+            <div class="aic-overlay">
+              <span class="aic-more">Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="aic-info">
+            <div class="aic-name">Noah Nemeth</div>
+            <span class="aic-genre">Comedy</span>
+          </div>
+        </div>
+
+        <div class="aic" onclick="showArtist('a2')">
+          <div class="aic-img">
+            <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Stefan Kurz" style="width:100%;height:100%;object-fit:cover"/>
+            <div class="aic-overlay">
+              <span class="aic-more">Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="aic-info">
+            <div class="aic-name">Stefan Kurz</div>
+            <span class="aic-genre">Comedy</span>
+          </div>
+        </div>
+
+        <div class="aic" onclick="showArtist('a3')">
+          <div class="aic-img">
+            <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Michi Rako" style="width:100%;height:100%;object-fit:cover"/>
+            <div class="aic-overlay">
+              <span class="aic-more">Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="aic-info">
+            <div class="aic-name">Michi Rako</div>
+            <span class="aic-genre">Comedy · Schauspiel</span>
+          </div>
+        </div>
+
+        <div class="aic" onclick="showArtist('a7')">
+          <div class="aic-img">
+            <img src="/maurio-/assets/kuenstler-noahkern-Skf8kkxd.png" alt="Noah Kern" style="width:100%;height:100%;object-fit:cover"/>
+            <div class="aic-overlay">
+              <span class="aic-more">Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="aic-info">
+            <div class="aic-name">Noah Kern</div>
+            <span class="aic-genre">DJ · Techno</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════
+     ARTIST DETAIL PAGES
+═══════════════════════════ -->
+<div class="page" id="artist-detail">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" data-back="kuenstler">Zurück zu Künstler:innen</button>
+      <div class="artist-detail-hero">
+        <div class="adh-photo">
+          <!-- ANPASSEN: KÜNSTLER-DETAILBILD — Platzhalter unten durch <img …> ersetzen
+               (id="detail-icon" dann im Script unter showArtist berücksichtigen oder entfernen) -->
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="" id="detail-icon" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+        <div class="adh-info">
+          <span class="eyebrow" id="detail-genre">Genre</span>
+          <h1 class="h-page" id="detail-name">Name</h1>
+          <div class="divider"></div>
+          <p class="body-s" id="detail-bio">Bio text</p>
+          <div class="social-links" id="detail-social"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════
+     FORMATE (main)
+═══════════════════════════ -->
+<div class="page" id="projekte">
+  <div class="page-header">
+    <div class="container">
+      <h1 class="h-page">Unsere<br><em>Projekte.</em></h1>
+      <div class="divider"></div>
+      <p class="body-s" style="max-width:480px">Comedy, Musik, Tourneen — und dein Projekt. Klick dich rein und entdecke, was hinter unseren Projekten steckt.</p>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="container">
+      <div class="formate-grid">
+
+        <div class="format-card" onclick="showFormat('comedy')">
+          <div class="format-card-img">
+            <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgbWl0IGVjaHRlbSBCaWxkLg==" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" aria-hidden="true"/>
+            <div class="format-icon">🎤</div>
+            <div class="format-card-overlay">
+              <span>Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="format-card-body">
+            <span class="format-tag">Comedy</span>
+            <h3 class="format-title">Stand-up-Comedy | Mixed Shows</h3>
+            <p class="format-teaser">Lachen verbindet.</p>
+          </div>
+        </div>
+
+        <div class="format-card" onclick="showFormat('musik')">
+          <div class="format-card-img">
+            <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgbWl0IGVjaHRlbSBCaWxkLg==" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" aria-hidden="true"/>
+            <div class="format-icon">♪</div>
+            <div class="format-card-overlay">
+              <span>Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="format-card-body">
+            <span class="format-tag">Elektronische Musik | Community</span>
+            <h3 class="format-title">Kollektiv Gänsehaut</h3>
+            <p class="format-teaser">Nächte, die bleiben.</p>
+          </div>
+        </div>
+
+        <div class="format-card" onclick="showFormat('tourneen')">
+          <div class="format-card-img">
+            <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgbWl0IGVjaHRlbSBCaWxkLg==" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" aria-hidden="true"/>
+            <div class="format-icon">◈</div>
+            <div class="format-card-overlay">
+              <span>Mehr erfahren ↗</span>
+            </div>
+          </div>
+          <div class="format-card-body">
+            <span class="format-tag">Künstler:innen auf Tour</span>
+            <h3 class="format-title">Tourneen</h3>
+            <p class="format-teaser">Von der Idee bis zum Applaus.</p>
+          </div>
+        </div>
+
+        <div class="format-card format-cta" onclick="showPage('legal')">
+          <div class="format-card-img format-cta-img">
+            <div class="format-icon">★</div>
+            <div class="format-card-overlay">
+              <span>Jetzt anfragen ↗</span>
+            </div>
+          </div>
+          <div class="format-card-body">
+            <span class="format-tag">Buchung & Planung</span>
+            <h3 class="format-title">Dein Projekt</h3>
+            <p class="format-teaser">Von der ersten Idee bis zur Umsetzung. Lass uns dein Projekt gemeinsam zum Leben erwecken.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════
+     FORMAT DETAIL PAGES
+═══════════════════════════ -->
+<div class="page" id="format-detail">
+  <div class="page-header">
+    <div class="container">
+      <button class="back-btn" data-back="projekte">Zurück zu Formate</button>
+      <span class="eyebrow" id="fd-tag">Format</span>
+      <h1 class="h-page" id="fd-title">Titel</h1>
+      <div class="divider"></div>
+      <p class="body-s" id="fd-desc" style="max-width:560px">Beschreibung</p>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="container">
+      <!-- Video -->
+      <div class="fd-video-wrap">
+        <div class="fd-video-inner" id="fd-video">
+          <div class="fd-video-placeholder">
+            <span>▶</span>
+            <p>Video folgt</p>
+          </div>
+        </div>
+      </div>
+      <!-- Gallery -->
+      <h2 class="h-section" style="margin:3.5rem 0 1.5rem">Impressionen</h2>
+      <div class="fd-gallery" id="fd-gallery">
+        <div class="fd-gal-item" onclick="openLightbox(0)">
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Galerie Bild 1" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+        <div class="fd-gal-item" onclick="openLightbox(1)">
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Galerie Bild 2" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+        <div class="fd-gal-item" onclick="openLightbox(2)">
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Galerie Bild 3" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+        <div class="fd-gal-item" onclick="openLightbox(3)">
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Galerie Bild 4" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+        <div class="fd-gal-item" onclick="openLightbox(4)">
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Galerie Bild 5" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+        <div class="fd-gal-item" onclick="openLightbox(5)">
+          <img src="data:image/webp;base64,UExBVFpIQUxURVI6IEVyc2V0emUgZGllc2UgRGF0ZWkgZHVyY2ggZGFzIGVjaHRlIEJpbGQu" alt="Galerie Bild 6" style="width:100%;height:100%;object-fit:cover"/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════
+     MENSCHEN
+═══════════════════════════ -->
+<div class="page" id="team">
+  <div class="page-header">
+    <div class="container">
+      <h1 class="h-page">Unsere<br><em>Menschen.</em></h1>
+      <div class="divider"></div>
+      <p class="body-s" style="max-width:480px">Fünf Persönlichkeiten. Eine gemeinsame Überzeugung. Hinter jedem Projekt stehen Menschen, die mit Herz und Haltung dabei sind.</p>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="container">
+      <div class="menschen-grid">
+
+        <div class="mensch-card">
+          <div class="mensch-photo">
+            <img src="/maurio-/assets/team-levent-OO4lVRZ4.png" alt="Levent"/>
+          </div>
+          <div class="mensch-info">
+            <div class="mensch-name">Levent</div>
+            <span class="mensch-role">Gründer | Kreativer Kopf</span>
+            <p class="mensch-desc">Die treibende Kraft hinter MAURIO. Von der ersten Idee bis zur letzten Minute eines Projekts behält Levent den Überblick. Er entwickelt Konzepte, begleitet Projekte von Anfang bis Ende und ist die zentrale Ansprechperson für Künstler:innen und Partner:innen.</p>
+          </div>
+        </div>
+
+        <div class="mensch-card">
+          <div class="mensch-photo mensch-photo-init">
+            <span>N</span>
+          </div>
+          <div class="mensch-info">
+            <div class="mensch-name">Naod</div>
+            <span class="mensch-role">Projektkoordination | Organisation</span>
+            <p class="mensch-desc">Naod steuert die organisatorischen Abläufe hinter den Projekten von MAURIO. Er plant, koordiniert und sorgt dafür, dass aus Ideen erfolgreiche Veranstaltungen werden. Mit seinem Blick fürs Detail und seiner strukturierten Arbeitsweise hält er die Fäden im Hintergrund zusammen.</p>
+          </div>
+        </div>
+
+        <div class="mensch-card">
+          <div class="mensch-photo">
+            <img src="/maurio-/assets/team-mattse-Dt-8y9Rh.png" alt="Mattse"/>
+          </div>
+          <div class="mensch-info">
+            <div class="mensch-name">Mattse</div>
+            <span class="mensch-role">Kreation | Gestaltung</span>
+            <p class="mensch-desc">Vom ersten Entwurf bis zum fertigen Reel. Mattse entwickelt Inhalte, gestaltet den Markenauftritt und sorgt dafür, dass Ideen sichtbar werden. Er entwickelt Strategien, gestaltet Vertragskonzepte und bringt sich mit kreativen Lösungen in jedes Projekt ein.</p>
+          </div>
+        </div>
+
+        <div class="mensch-card">
+          <div class="mensch-photo">
+            <img src="/maurio-/assets/team-ina-CixvmuCT.png" alt="Ina"/>
+          </div>
+          <div class="mensch-info">
+            <div class="mensch-name">Ina</div>
+            <span class="mensch-role">Live | Produktion</span>
+            <p class="mensch-desc">Vor Ort sorgt Ina dafür, dass alles reibungslos funktioniert. Sie koordiniert den Auf- und Abbau, ist Ansprechpartnerin für Künstler:innen und Gäste und behält auch dann den Überblick, wenn es hektisch wird.</p>
+          </div>
+        </div>
+
+        <div class="mensch-card">
+          <div class="mensch-photo mensch-photo-init">
+            <span>N</span>
+          </div>
+          <div class="mensch-info">
+            <div class="mensch-name">Nazlican</div>
+            <span class="mensch-role">Social Media | Community</span>
+            <p class="mensch-desc">Nazlican bringt unsere Projekte auf Social Media sichtbar nach außen. Sie betreut unsere Kanäle, veröffentlicht Inhalte und entwickelt neue Content-Ideen für alle Plattformen.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════
+     KONTAKT / LEGAL
+═══════════════════════════ -->
+<div class="page" id="legal">
+  <div class="page-header">
+    <div class="container">
+      <h1 class="h-page">Lass uns<br><em>sprechen.</em></h1>
+      <div class="divider"></div>
+      <p class="body-s" style="max-width:480px">Booking-Anfrage, Projekt-Idee oder Kooperation — schreib uns direkt. Wir melden uns.</p>
+    </div>
+  </div>
+  <div class="page-content">
+    <div class="container">
+
+      <div class="contact-section">
+        <form id="contact-form" class="contact-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cf-name">Name</label>
+              <input type="text" id="cf-name" name="name" required placeholder="Dein Name"/>
+            </div>
+            <div class="form-group">
+              <label for="cf-email">E-Mail</label>
+              <input type="email" id="cf-email" name="email" required placeholder="deine@email.de"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="cf-subject">Betreff</label>
+            <input type="text" id="cf-subject" name="subject" placeholder="Booking · Kooperation · Anfrage"/>
+          </div>
+          <div class="form-group">
+            <label for="cf-message">Nachricht</label>
+            <textarea id="cf-message" name="message" rows="6" required placeholder="Deine Nachricht an MAURIO..."></textarea>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-solid">Nachricht senden →</button>
+            <p class="form-note">Oder direkt: <a href="mailto:info@maurio.de">info@maurio.de</a> · <a href="tel:+4917789055555">+49 177 890 55 55</a></p>
+          </div>
+        </form>
+      </div>
+
+      <div class="legal-grid" style="margin-top:4rem">
+        <div class="legal-block">
+          <span class="legal-tag">§ 5 DDG</span>
+          <h3>Impressum</h3>
+          <address>
+            <strong style="color:var(--white)">MAURIO – kunst.raum.statement</strong><br>
+            Levent Süzal<br>
+            Schradenbergstraße 1<br>
+            73434 Aalen<br><br>
+            E-Mail: <a href="mailto:info@maurio.de">info@maurio.de</a><br>
+            Tel.: <a href="tel:+4917789055555">+49 177 890 55 55</a><br><br>
+            USt-IdNr. (§ 27a UStG): DE276387148<br><br>
+            Verantw. i. S. d. § 18 Abs. 2 MStV:<br>Levent Süzal — Anschrift s. o.
+          </address>
+        </div>
+        <div class="legal-block">
+          <span class="legal-tag">DSGVO</span>
+          <h3>Datenschutz</h3>
+          <p>Verantwortlicher i. S. d. DSGVO: Levent Süzal (s. Impressum).<br><br>
+          Diese Website ist eine statische Single-Page-Anwendung. Es werden keine Tracking-Cookies gesetzt. Beim Besuch werden serverseitig technisch notwendige Zugriffsdaten erhoben (IP-Adresse, Zeitstempel, aufgerufene Ressource). Diese dienen dem Betrieb und werden nach spätestens 7 Tagen gelöscht (Art. 6 Abs. 1 lit. f DSGVO).<br><br>
+          <strong style="color:var(--white);font-weight:600">Schriftarten:</strong> Diese Website nutzt Google Fonts (Google LLC, USA). Beim Laden werden Anfragen an Google-Server gesendet, dabei wird Ihre IP-Adresse übertragen. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO. Weitere Infos: policies.google.com/privacy.<br><br>
+          <strong style="color:var(--white);font-weight:600">Kontaktformular:</strong> Das Formular öffnet Ihr E-Mail-Programm. Formulardaten werden nicht durch uns gespeichert. Rechtsgrundlage bei Versand: Art. 6 Abs. 1 lit. b DSGVO.<br><br>
+          <strong style="color:var(--white);font-weight:600">Ihre Rechte:</strong> Auskunft, Berichtigung, Löschung, Einschränkung (Art. 15–18 DSGVO), Datenübertragbarkeit (Art. 20 DSGVO), Widerspruch (Art. 21 DSGVO). Beschwerden an den Landesbeauftragten für Datenschutz Baden-Württemberg.</p>
+        </div>
+        <div class="legal-block">
+          <span class="legal-tag">Rechtliches</span>
+          <h3>Haftung & Urheberrecht</h3>
+          <p>Alle Inhalte dieser Website sind urheberrechtlich geschützt. Texte, Bilder und Logos dürfen ohne schriftliche Genehmigung nicht vervielfältigt werden.<br><br>
+          Für verlinkte externe Seiten übernehmen wir keine Haftung. Für deren Inhalt sind ausschließlich deren Betreiber verantwortlich.<br><br>
+          Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.<br><br>
+          <em style="font-size:.72rem;color:rgba(245,219,171,.25)">Stand: 2025 · Alle Angaben ohne Gewähr</em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="footer-logo"><img src="/maurio-/assets/logo-CM0JiBeU.png" alt="MAURIO"/></div>
+    <div class="footer-copy">© 2025 MAURIO — Levent Süzal</div>
+    <nav class="footer-nav">
+      <a onclick="showPage('home')">MAURIO</a>
+      <a onclick="showPage('vision')">VISION</a>
+      <a onclick="showPage('projekte')">PROJEKTE</a>
+      <a onclick="showPage('kuenstler')">KÜNSTLER:INNEN</a>
+      <a onclick="showPage('team')">MENSCHEN</a>
+      <a onclick="showPage('legal')">KONTAKT & IMPRESSUM</a>
+    </nav>
+  </footer>
+</div>
+
+
+<!-- ── LIGHTBOX ── -->
+<div id="lightbox" onclick="closeLightbox(event)">
+  <div id="lightbox-inner">
+    <div class="lightbox-close" onclick="closeLightbox()">✕</div>
+    <div class="lightbox-nav lightbox-prev" onclick="lbNav(-1,event)">‹</div>
+    <div class="lightbox-nav lightbox-next" onclick="lbNav(1,event)">›</div>
+    <div id="lightbox-placeholder">
+      <span>◈</span>
+      <p>Bild folgt</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
